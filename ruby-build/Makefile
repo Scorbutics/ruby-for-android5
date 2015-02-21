@@ -2,11 +2,11 @@
 
 RELEASE=3
 
-OPENSSL_VERSION = 1.0.1j
-RUBY_RELEASE = 2.2
-RUBY_VERSION = 2.2.0
-RUBY_SRC_VERSION = 2.2.0-rc1
-RUBY_SRC_DIR = ruby-2.2.0-rc1
+OPENSSL_VERSION=1.0.1j
+RUBY_RELEASE=2.2
+RUBY_VERSION=2.2.0
+RUBY_SRC_VERSION=2.2.0
+RUBY_SRC_DIR=ruby-2.2.0
 
 TOPDIR=$(shell pwd)
 
@@ -53,8 +53,9 @@ clean_ruby:
 	(cd $(RUBY_SRC_DIR) && \
 		export CFLAGS="-I$(TOPDIR)/openssl-$(OPENSSL_VERSION)/include" && \
 		export LDFLAGS="-L$(TOPDIR)/openssl-$(OPENSSL_VERSION)" && \
-		./configure --target=arm-linux-androideabi --host=arm-linux-androideabi --prefix=$(TOPDIR)/rubyroot --enable-shared CFLAGS=-Wno-error)
-	##(cd ruby-$(RUBY_SRC_VERSION) && patch -p1 < ../ruby.diff)
+		./configure --target=arm-linux-androideabi --host=arm-linux-androideabi --prefix=$(TOPDIR)/rubyroot --enable-shared CFLAGS=-Wno-errorW)
+	# edit ruby-2.2.0/Makefile rule for $(PROGRAM) ~ line 210 and add: -pie -fPIE 
+	(cd ruby-$(RUBY_SRC_VERSION) && patch < ../rubypie.diff)
 	(cd $(RUBY_SRC_DIR) && make main)
 	>.ruby.done
 
