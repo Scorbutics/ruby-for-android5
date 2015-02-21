@@ -29,4 +29,5 @@ Usage
 
 Once deployed on the Android device (either manually or as part of an APK) ruby needs to know 
 about the libraries. Call ruby like this:
+
 `RUBYROOT/bin/ruby -IRUBYROOT/lib/ruby/2.2.0 -IRUBYROOT/lib/ruby/2.2.0/arm-linux-androideabi <ruby options>`
