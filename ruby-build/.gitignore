@@ -1,0 +1,7 @@
+.*.done
+extras
+interpreter
+openssl-*
+ruby-*
+ruby_*.zip
+rubyroot

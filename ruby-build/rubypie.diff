@@ -1,0 +1,11 @@
+--- Makefile.orig	2015-02-21 17:46:11.407974729 +0100
++++ Makefile	2015-02-21 17:46:38.186900753 +0100
+@@ -207,7 +207,7 @@
+ $(PROGRAM):
+ 		@$(RM) $@
+ 		$(ECHO) linking $@
+-		$(Q) $(PURIFY) $(CC) $(LDFLAGS) $(XLDFLAGS) $(MAINOBJ) $(EXTOBJS) $(LIBRUBYARG) $(MAINLIBS) $(LIBS) $(EXTLIBS) $(OUTFLAG)$@
++		$(Q) $(PURIFY) $(CC) $(LDFLAGS) $(XLDFLAGS) $(MAINOBJ) $(EXTOBJS) $(LIBRUBYARG) $(MAINLIBS) $(LIBS) $(EXTLIBS) -pie -fPIE $(OUTFLAG)$@
+ 		$(Q) $(POSTLINK)
+ 
+ # We must `rm' the library each time this rule is invoked because "updating" a
