@@ -1,4 +1,4 @@
-Ruby for Android5
+Ruby for Android 5
 ===
 
 This is a project to compile Ruby for Android5 (as PIE). It originated from https://github.com/chrisistuff/ruby-for-android that has been created in 2013 but is now abandoned.
