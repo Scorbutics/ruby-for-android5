@@ -50,9 +50,9 @@ clean_ruby:
 	rm -rf $(RUBY_SRC_DIR)
 	tar -Jxf $(RUBY_SRC_DIR).tar.xz
 	(cd $(RUBY_SRC_DIR) && \
-		export CFLAGS="-I$(TOPDIR)/openssl-$(OPENSSL_VERSION)/include" && \
+		export CFLAGS="-I$(TOPDIR)/openssl-$(OPENSSL_VERSION)/include -pie" && \
 		export LDFLAGS="-L$(TOPDIR)/openssl-$(OPENSSL_VERSION)" && \
-		./configure --target=arm-linux-androideabi --host=arm-linux-androideabi --prefix=$(TOPDIR)/rubyroot --enable-shared CFLAGS=-pie)
+		./configure --target=arm-linux-androideabi --host=arm-linux-androideabi --prefix=$(TOPDIR)/rubyroot --enable-shared)
 	(cd $(RUBY_SRC_DIR) && make main)
 	>.ruby.done
 
