@@ -30,5 +30,11 @@ Usage
 ===
 
 Once deployed on the Android device (either manually or as part of an APK) ruby needs to know 
+<<<<<<< HEAD
 about the libraries. Call Ruby like this:
 `<RUBYROOT>/bin/ruby -I<RUBYROOT>/lib/ruby/2.2.0 -I<RUBYROOT>/lib/ruby/2.2.0/arm-linux-androideabi <ruby options>`
+=======
+about the libraries. Call ruby like this:
+
+`RUBYROOT/bin/ruby -IRUBYROOT/lib/ruby/2.2.0 -IRUBYROOT/lib/ruby/2.2.0/arm-linux-androideabi <ruby options>`
+>>>>>>> 7d0d415b5b03084283a1e24aa2a74dc03c0d7173
