@@ -3,6 +3,7 @@ extras
 interpreter
 openssl-*
 ruby-*
+ncurses-*
 ruby_*.zip
 rubyroot
 .pc

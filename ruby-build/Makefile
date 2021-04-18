@@ -3,6 +3,7 @@
 RELEASE=3
 
 OPENSSL_VERSION=1.1.1k
+NCURSES_VERSION=6.0
 RUBY_RELEASE=3.0
 RUBY_VERSION=3.0.0
 RUBY_SRC_VERSION=3.0.0
@@ -36,9 +37,18 @@ clean_ruby:
 	rm -f .ruby.done
 
 .fetch.done:
+	wget ftp://ftp.gnu.org/gnu/ncurses/ncurses-$(NCURSES_VERSION).tar.gz
 	wget -c http://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz
 	wget -c http://ftp.ruby-lang.org/pub/ruby/$(RUBY_RELEASE)/$(RUBY_SRC_DIR).tar.xz
 	>.fetch.done
+
+.ncurses.done: .fetch.done
+	rm -rf ncurses-$(NCURSES_VERSION)
+	tar -zxf ncurses-$(NCURSES_VERSION).tar.gz
+	(cd ncurses-$(NCURSES_VERSION) && \
+		CPPFLAGS="-P" ./configure --host=$$HOST --target=$$HOST --enable-term-driver --enable-sp-funcs --with-shared && \
+		make)
+	>.ncurses.done
 
 .openssl.done: .fetch.done
 	rm -rf openssl-$(OPENSSL_VERSION)
@@ -46,7 +56,7 @@ clean_ruby:
 	(cd openssl-$(OPENSSL_VERSION) && ./Configure $$HOST_SHORT "-D__ANDROID_API__=$$ANDROID_API" shared && make)
 	>.openssl.done
 
-.ruby.done: .openssl.done
+.ruby.done: .ncurses.done .openssl.done
 	rm -rf $(RUBY_SRC_DIR)
 	tar -Jxf $(RUBY_SRC_DIR).tar.xz
 	for p in $$(ls patches); do (cd $(RUBY_SRC_DIR) && patch < $(TOPDIR)/patches/$$p); done
