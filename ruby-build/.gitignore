@@ -5,3 +5,4 @@ openssl-*
 ruby-*
 ruby_*.zip
 rubyroot
+.pc
