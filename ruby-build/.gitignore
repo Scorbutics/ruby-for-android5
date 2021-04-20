@@ -5,6 +5,7 @@ openssl-*
 ruby-*
 ncurses-*
 readline-*
+gdbm-*
 target/
 ruby_*.zip
 rubyroot

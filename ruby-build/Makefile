@@ -5,6 +5,7 @@ RELEASE=3
 OPENSSL_VERSION=1.1.1k
 NCURSES_VERSION=6.0
 READLINE_VERSION=8.0
+GDMB_VERSION=1.18.1
 RUBY_RELEASE=3.0
 RUBY_VERSION=3.0.0
 RUBY_SRC_VERSION=3.0.0
@@ -30,6 +31,8 @@ ncurses: .ncurses.done
 
 readline: .readline.done
 
+gdbm: .gdbm.done
+
 ruby: .ruby.done
 
 clean:
@@ -39,6 +42,7 @@ clean:
 	rm -rf openssl-$(OPENSSL_VERSION)
 	rm -rf ncurses-$(NCURSES_VERSION)
 	rm -rf readline-$(READLINE_VERSION)
+	rm -rf gdbm-$(GDMB_VERSION)
 	rm -rf ruby-$(RUBY_SRC_VERSION)
 	rm -f .*.done
 
@@ -46,6 +50,7 @@ mrproper: clean
 	rm -f openssl-$(OPENSSL_VERSION).tar.gz
 	rm -f ncurses-$(NCURSES_VERSION).tar.gz
 	rm -f readline-$(READLINE_VERSION).tar.gz
+	rm -f gdbm-$(GDMB_VERSION).tar.gz
 	rm -f $(RUBY_SRC_DIR).tar.xz
 	rm -f ruby_r$(RELEASE).zip
 	rm -f ruby_extras_r$(RELEASE).zip
@@ -57,6 +62,7 @@ clean_ruby:
 	wget ftp://ftp.gnu.org/gnu/ncurses/ncurses-$(NCURSES_VERSION).tar.gz
 	wget ftp://ftp.gnu.org/gnu/readline/readline-$(READLINE_VERSION).tar.gz
 	wget -c http://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz
+	wget ftp://ftp.gnu.org/gnu/gdbm/gdbm-$(GDMB_VERSION).tar.gz
 	wget -c http://ftp.ruby-lang.org/pub/ruby/$(RUBY_RELEASE)/$(RUBY_SRC_DIR).tar.xz
 	mkdir -p $(TOPDIR)/target
 	>.fetch.done
@@ -75,12 +81,25 @@ clean_ruby:
 	tar -zxf readline-$(READLINE_VERSION).tar.gz
 	(cd readline-$(READLINE_VERSION) && \
 		autoconf && \
-		CFLAGS="$(EXTRA_CFLAGS)" \
-		LDFLAGS="$(EXTRA_LDFLAGS)" \
+		CFLAGS="$$CFLAGS $(EXTRA_CFLAGS)" \
+		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS)" \
+		CPPFLAGS="$$CPPFLAGS $(EXTRA_CFLAGS)" \
 		./configure --host=$$HOST --target=$$HOST --enable-shared && \
 		make && \
 		make install DESTDIR=$(TOPDIR)/target)
 	>.readline.done
+
+.gdbm.done: .readline.done
+	rm -rf gdbm-$(GDMB_VERSION)
+	tar -zxf gdbm-$(GDMB_VERSION).tar.gz
+	#patch -p1 < $BUILD_DIR/patch/gdbm/000_mingw_compile.patch
+	(cd gdbm-$(GDMB_VERSION) && \
+		CFLAGS="$$CFLAGS $(EXTRA_CFLAGS)" \
+		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS)" \
+		CPPFLAGS="$$CPPFLAGS $(EXTRA_CFLAGS)" \
+		./configure --host=$$HOST --target=$$HOST --enable-shared --disable-static --enable-libgdbm-compat && \
+		make && \
+		make install DESTDIR=$(TOPDIR)/target)
 
 .openssl.done: .fetch.done
 	rm -rf openssl-$(OPENSSL_VERSION)
@@ -90,7 +109,7 @@ clean_ruby:
 		make install DESTDIR=$(TOPDIR)/target)
 	>.openssl.done
 
-.ruby.done: .readline.done .openssl.done
+.ruby.done: .readline.done .gdbm.done .openssl.done
 	rm -rf $(RUBY_SRC_DIR)
 	tar -Jxf $(RUBY_SRC_DIR).tar.xz
 	for p in $$(ls patches); do (cd $(RUBY_SRC_DIR) && patch < $(TOPDIR)/patches/$$p); done
