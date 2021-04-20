@@ -4,6 +4,8 @@ interpreter
 openssl-*
 ruby-*
 ncurses-*
+readline-*
+target/
 ruby_*.zip
 rubyroot
 .pc
