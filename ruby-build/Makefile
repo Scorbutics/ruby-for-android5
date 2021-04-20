@@ -28,6 +28,8 @@ openssl: .openssl.done
 
 ncurses: .ncurses.done
 
+readline: .readline.done
+
 ruby: .ruby.done
 
 clean:
