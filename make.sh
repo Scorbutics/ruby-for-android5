@@ -50,5 +50,7 @@ PATH="$TOOLCHAIN_BIN:$PATH"
 #export LDFLAGS="-L$TOOLCHAIN/lib"
 #export LDFLAGS="-L$TOOLCHAIN/lib/gcc/$TARGET/$ABI_VERSION.x/"
 
+export LDFLAGS="-lm"
+
 cd ruby-build/
 make

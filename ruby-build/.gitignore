@@ -6,6 +6,7 @@ ruby-*
 ncurses-*
 readline-*
 gdbm-*
+zlib-*
 target/
 ruby_*.zip
 rubyroot

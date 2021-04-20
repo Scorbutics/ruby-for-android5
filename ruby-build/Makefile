@@ -6,10 +6,13 @@ OPENSSL_VERSION=1.1.1k
 NCURSES_VERSION=6.0
 READLINE_VERSION=8.0
 GDMB_VERSION=1.18.1
+ZLIB_VERSION=1.2.11
 RUBY_RELEASE=3.0
 RUBY_VERSION=3.0.0
 RUBY_SRC_VERSION=3.0.0
 RUBY_SRC_DIR=ruby-3.0.0
+
+TOPDIR=$(shell pwd)
 
 INCLUDE_DIR_USR=$(TOPDIR)/target/usr/include
 INCLUDE_DIR_USR_LOCAL=$(TOPDIR)/target/usr/local/include
@@ -17,9 +20,7 @@ LINK_DIR_USR=$(TOPDIR)/target/usr/lib
 LINK_DIR_USR_LOCAL=$(TOPDIR)/target/usr/local/lib
 
 EXTRA_CFLAGS=-I$(INCLUDE_DIR_USR) -I$(INCLUDE_DIR_USR_LOCAL)
-EXTRA_LDFLAGS=-L$(LINK_DIR_USR) -L$(LINK_DIR_USR_LOCAL)
-
-TOPDIR=$(shell pwd)
+EXTRA_LDFLAGS=-L$(LINK_DIR_USR) -L$(LINK_DIR_USR_LOCAL) -L$(TOPDIR)/$(RUBY_SRC_DIR)
 
 zips: ruby_r$(RELEASE).zip ruby_extras_r$(RELEASE).zip
 
@@ -33,6 +34,8 @@ readline: .readline.done
 
 gdbm: .gdbm.done
 
+zlib: .zlib.done
+
 ruby: .ruby.done
 
 clean:
@@ -43,6 +46,7 @@ clean:
 	rm -rf ncurses-$(NCURSES_VERSION)
 	rm -rf readline-$(READLINE_VERSION)
 	rm -rf gdbm-$(GDMB_VERSION)
+	rm -rf zlib-$(ZLIB_VERSION)
 	rm -rf ruby-$(RUBY_SRC_VERSION)
 	rm -f .*.done
 
@@ -50,6 +54,7 @@ mrproper: clean
 	rm -f openssl-$(OPENSSL_VERSION).tar.gz
 	rm -f ncurses-$(NCURSES_VERSION).tar.gz
 	rm -f readline-$(READLINE_VERSION).tar.gz
+	rm -f zlib-$(ZLIB_VERSION).tar.gz
 	rm -f gdbm-$(GDMB_VERSION).tar.gz
 	rm -f $(RUBY_SRC_DIR).tar.xz
 	rm -f ruby_r$(RELEASE).zip
@@ -63,6 +68,7 @@ clean_ruby:
 	wget ftp://ftp.gnu.org/gnu/readline/readline-$(READLINE_VERSION).tar.gz
 	wget -c http://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz
 	wget ftp://ftp.gnu.org/gnu/gdbm/gdbm-$(GDMB_VERSION).tar.gz
+	wget http://zlib.net/zlib-$(ZLIB_VERSION).tar.gz
 	wget -c http://ftp.ruby-lang.org/pub/ruby/$(RUBY_RELEASE)/$(RUBY_SRC_DIR).tar.xz
 	mkdir -p $(TOPDIR)/target
 	>.fetch.done
@@ -92,7 +98,6 @@ clean_ruby:
 .gdbm.done: .readline.done
 	rm -rf gdbm-$(GDMB_VERSION)
 	tar -zxf gdbm-$(GDMB_VERSION).tar.gz
-	#patch -p1 < $BUILD_DIR/patch/gdbm/000_mingw_compile.patch
 	(cd gdbm-$(GDMB_VERSION) && \
 		CFLAGS="$$CFLAGS $(EXTRA_CFLAGS)" \
 		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS)" \
@@ -110,20 +115,29 @@ clean_ruby:
 		make install DESTDIR=$(TOPDIR)/target)
 	>.openssl.done
 
-.ruby.done: .readline.done .gdbm.done .openssl.done
+.zlib.done: .fetch.done
+	rm -rf zlib-$(ZLIB_VERSION)
+	tar -zxf zlib-$(ZLIB_VERSION).tar.gz
+	(cd zlib-$(ZLIB_VERSION) && ./configure && \
+		make && \
+		make install DESTDIR=$(TOPDIR)/target)
+	>.zlib.done
+
+.ruby.done: .readline.done .gdbm.done .zlib.done .openssl.done
 	rm -rf $(RUBY_SRC_DIR)
 	tar -Jxf $(RUBY_SRC_DIR).tar.xz
 	for p in $$(ls patches/ruby); do (cd $(RUBY_SRC_DIR) && patch < $(TOPDIR)/patches/ruby/$$p); done
 	(cd $(RUBY_SRC_DIR) && \
 		CFLAGS="$$CFLAGS $(EXTRA_CFLAGS)" \
-		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS)" \
+		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS) -lz" \
 		CPPFLAGS="$$CPPFLAGS $(EXTRA_CFLAGS)" \
 		./configure \
 		--host=$$HOST \
 		--target=$$HOST \
 		--enable-shared \
 		--disable-install-doc && \
-		make)
+		make && \
+		make install DESTDIR=$(TOPDIR)/target)
 	>.ruby.done
 
 .ruby.install.done: .ruby.done
