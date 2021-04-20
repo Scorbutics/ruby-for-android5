@@ -100,6 +100,7 @@ clean_ruby:
 		./configure --host=$$HOST --target=$$HOST --enable-shared --disable-static --enable-libgdbm-compat && \
 		make && \
 		make install DESTDIR=$(TOPDIR)/target)
+	>.gdbm.done
 
 .openssl.done: .fetch.done
 	rm -rf openssl-$(OPENSSL_VERSION)
