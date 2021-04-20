@@ -8,6 +8,6 @@ readline-*
 gdbm-*
 zlib-*
 target/
-ruby_*.zip
+ruby.zip
 rubyroot
 .pc

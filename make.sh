@@ -53,4 +53,4 @@ PATH="$TOOLCHAIN_BIN:$PATH"
 export LDFLAGS="-lm"
 
 cd ruby-build/
-make
+make "$@"

@@ -1,6 +1,4 @@
-.PHONY: fetch openssl ruby zips clean mrproper clean_ruby
-
-RELEASE=3
+.PHONY: fetch openssl ruby clean mrproper clean_ruby
 
 OPENSSL_VERSION=1.1.1k
 NCURSES_VERSION=6.0
@@ -8,9 +6,8 @@ READLINE_VERSION=8.0
 GDMB_VERSION=1.18.1
 ZLIB_VERSION=1.2.11
 RUBY_RELEASE=3.0
-RUBY_VERSION=3.0.0
-RUBY_SRC_VERSION=3.0.0
-RUBY_SRC_DIR=ruby-3.0.0
+RUBY_SRC_VERSION=$(RUBY_RELEASE).0
+RUBY_SRC_DIR=ruby-$(RUBY_SRC_VERSION)
 
 TOPDIR=$(shell pwd)
 
@@ -22,7 +19,7 @@ LINK_DIR_USR_LOCAL=$(TOPDIR)/target/usr/local/lib
 EXTRA_CFLAGS=-I$(INCLUDE_DIR_USR) -I$(INCLUDE_DIR_USR_LOCAL)
 EXTRA_LDFLAGS=-L$(LINK_DIR_USR) -L$(LINK_DIR_USR_LOCAL) -L$(TOPDIR)/$(RUBY_SRC_DIR)
 
-zips: ruby_r$(RELEASE).zip ruby_extras_r$(RELEASE).zip
+all: .ruby.zip
 
 fetch: .fetch.done
 
@@ -57,8 +54,6 @@ mrproper: clean
 	rm -f zlib-$(ZLIB_VERSION).tar.gz
 	rm -f gdbm-$(GDMB_VERSION).tar.gz
 	rm -f $(RUBY_SRC_DIR).tar.xz
-	rm -f ruby_r$(RELEASE).zip
-	rm -f ruby_extras_r$(RELEASE).zip
 
 clean_ruby:
 	rm -f .ruby.done
@@ -136,8 +131,7 @@ clean_ruby:
 		--target=$$HOST \
 		--enable-shared \
 		--disable-install-doc && \
-		make && \
-		make install DESTDIR=$(TOPDIR)/target)
+		make)
 	>.ruby.done
 
 .ruby.install.done: .ruby.done
@@ -145,24 +139,5 @@ clean_ruby:
 	(cd ruby-$(RUBY_SRC_VERSION) && make install-nodoc DESTDIR=$(TOPDIR)/target)
 	>.ruby.install.done
 
-ruby_r$(RELEASE).zip: .ruby.install.done
-	rm -rf interpreter
-	mkdir -p interpreter/ruby
-	mkdir -p interpreter/ruby/bin
-	cp rubyroot/bin/ruby interpreter/ruby/bin
-	cp rubyroot/bin/irb interpreter/ruby/bin
-	mkdir -p interpreter/ruby/lib/ruby/$(RUBY_VERSION)
-	cp -r rubyroot/lib/ruby/$(RUBY_VERSION)/$$HOST interpreter/ruby/lib/ruby/$(RUBY_VERSION)
-	cp rubyroot/lib/libruby.so.$(RUBY_VERSION) interpreter/ruby/lib
-	cp openssl-$(OPENSSL_VERSION)/lib*.so.* interpreter/ruby/lib
-	find interpreter -name *.so -exec $$HOST-strip {} \;
-	$$HOST-strip interpreter/ruby/bin/ruby
-	(cd interpreter && zip -r ../ruby_r$(RELEASE).zip ruby)
-
-ruby_extras_r$(RELEASE).zip: .ruby.install.done
-	rm -rf extras
-	mkdir -p extras/ruby
-	mkdir -p extras/ruby/lib/ruby/$(RUBY_VERSION)
-	cp -r rubyroot/lib/ruby/$(RUBY_VERSION)/* extras/ruby/lib/ruby/$(RUBY_VERSION)
-	rm -rf extras/ruby/lib/ruby/$(RUBY_VERSION)/$$HOST
-	(cd extras && zip -r ../ruby_extras_r$(RELEASE).zip ruby)
+.ruby.zip: .ruby.install.done
+	zip -r ruby.zip $(TOPDIR)/target/usr/local/lib/ruby/$(RUBY_SRC_VERSION) $(TOPDIR)/target/usr/local/lib/libruby.so*
