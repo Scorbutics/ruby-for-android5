@@ -112,7 +112,7 @@ clean_ruby:
 .ruby.done: .readline.done .gdbm.done .openssl.done
 	rm -rf $(RUBY_SRC_DIR)
 	tar -Jxf $(RUBY_SRC_DIR).tar.xz
-	for p in $$(ls patches); do (cd $(RUBY_SRC_DIR) && patch < $(TOPDIR)/patches/$$p); done
+	for p in $$(ls patches/ruby); do (cd $(RUBY_SRC_DIR) && patch < $(TOPDIR)/patches/ruby/$$p); done
 	(cd $(RUBY_SRC_DIR) && \
 		CFLAGS="$$CFLAGS $(EXTRA_CFLAGS)" \
 		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS)" \
