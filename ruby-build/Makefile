@@ -19,7 +19,7 @@ LINK_DIR_USR_LOCAL=$(TOPDIR)/target/usr/local/lib
 EXTRA_CFLAGS=-I$(INCLUDE_DIR_USR) -I$(INCLUDE_DIR_USR_LOCAL)
 EXTRA_LDFLAGS=-L$(LINK_DIR_USR) -L$(LINK_DIR_USR_LOCAL) -L$(TOPDIR)/$(RUBY_SRC_DIR)
 
-all: .ruby.zip
+all: .ruby.zip.done
 
 fetch: .fetch.done
 
@@ -127,10 +127,10 @@ clean_ruby:
 		LDFLAGS="$$LDFLAGS $(EXTRA_LDFLAGS) -lz" \
 		CPPFLAGS="$$CPPFLAGS $(EXTRA_CFLAGS)" \
 		./configure \
-		--host=$$HOST \
-		--target=$$HOST \
-		--enable-shared \
-		--disable-install-doc && \
+			--host=$$HOST \
+			--target=$$HOST \
+			--enable-shared \
+			--disable-install-doc && \
 		make)
 	>.ruby.done
 
@@ -139,5 +139,11 @@ clean_ruby:
 	(cd ruby-$(RUBY_SRC_VERSION) && make install-nodoc DESTDIR=$(TOPDIR)/target)
 	>.ruby.install.done
 
-.ruby.zip: .ruby.install.done
-	zip -r ruby.zip $(TOPDIR)/target/usr/local/lib/ruby/$(RUBY_SRC_VERSION) $(TOPDIR)/target/usr/local/lib/libruby.so*
+.ruby.zip.done: .ruby.install.done
+	rm -f ruby_full.zip
+	(cd $(TOPDIR)/target/ && \
+		zip --symlinks -r $(TOPDIR)/ruby_full.zip \
+			usr/local/lib/ruby/$(RUBY_SRC_VERSION) \
+			usr/local/lib/lib*.so* \
+			usr/local/bin/irb usr/local/bin/gem usr/local/bin/rake usr/local/bin/ruby)
+	>.ruby.zip.done
