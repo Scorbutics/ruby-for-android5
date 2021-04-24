@@ -64,4 +64,11 @@ FOREACH(subdir ${SUBDIRS})
 	endif()
 ENDFOREACH()
 
-add_custom_target(everything ALL DEPENDS ruby)
+add_custom_target(zip ALL
+	COMMAND
+	zip --symlinks -r ruby_full.zip
+		usr/local/lib/ruby/
+		usr/local/lib/lib*.so*
+		usr/local/bin/irb usr/local/bin/gem usr/local/bin/rake usr/local/bin/ruby usr/local/bin/bundle usr/local/bin/bundler
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/target
+	DEPENDS ruby)
