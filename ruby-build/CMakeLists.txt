@@ -20,25 +20,26 @@ FOREACH(subdir ${SUBDIRS})
 
 		include(${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/cmake.conf)
 
-		set(${subdir}_downloaded_target ${CMAKE_SOURCE_DIR}/download/${subdir}-${${subdir}_version}.tar.*)
-		add_custom_target(${subdir}_download COMMAND find -name "${${subdir}_downloaded_target}" -type f &>/dev/null || wget ${${subdir}_download_url}
+		set(${subdir}_downloaded_target ${CMAKE_SOURCE_DIR}/download/${subdir}-${${subdir}_version}*)
+		add_custom_target(${subdir}_download COMMAND /bin/bash -c \"if ! ls ${${subdir}_downloaded_target} &>/dev/null\; then wget ${${subdir}_download_url}\; fi\"
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/download
 		)
 
 		if(NOT DEFINED ${subdir}_extract_command)
 			set(${subdir}_extract_command tar -zxf ${${subdir}_downloaded_target})
 		endif()
-		add_custom_target(${subdir}_extract COMMAND [ -d "${subdir}-${${subdir}_version}" ] || ${${subdir}_extract_command}
+		add_custom_target(${subdir}_extract COMMAND /bin/bash -c \"[ -d '${subdir}-${${subdir}_version}' ] || ${${subdir}_extract_command}\"
 			WORKING_DIRECTORY ${${subdir}_build_dir}
 			DEPENDS ${subdir}_download
 		)
 
-		add_custom_target(${subdir}_patch COMMAND [ -f "../.patch.done" ] || for p in `ls ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/patches`\; do patch < ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/patches/$$p\; done && touch ../.patch.done
-			WORKING_DIRECTORY ${${subdir}_build_dir}/${subdir}-${${subdir}_version}
+		FILE(GLOB ${subdir}_patch_files ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/patches/*)
+		add_custom_target(${subdir}_patch COMMAND if test -f '../.patch.done'\; then exit 0\; fi\; cd ${${subdir}_build_dir}/${subdir}-${${subdir}_version} && for p in `ls ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/patches/`\; do echo \$\$p && patch < ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/patches/\$\$p\; done && touch ../.patch.done
+			WORKING_DIRECTORY ${${subdir}_build_dir}/${subdir}-${${subdir}_version}	
 			DEPENDS ${subdir}_extract
 		)
 
-		add_custom_target(${subdir}_configure COMMAND [ -f "../.configure.done" ] || ${SETUP_COMMAND} && ${${subdir}_configure_command} && touch ../.configure.done
+		add_custom_target(${subdir}_configure COMMAND /bin/bash -c \"[ -f '../.configure.done' ] && exit 0 ||  ${SETUP_COMMAND}\; ${${subdir}_configure_command} && touch ../.configure.done\"
 			WORKING_DIRECTORY ${${subdir}_build_dir}/${subdir}-${${subdir}_version}
 			DEPENDS ${subdir}_patch
 		)
@@ -46,7 +47,7 @@ FOREACH(subdir ${SUBDIRS})
 		if(NOT DEFINED ${subdir}_build_command)
 			set(${subdir}_build_command make)
 		endif()
-		add_custom_target(${subdir}_build COMMAND [ -f "../.build.done" ] || ${SETUP_COMMAND} && ${${subdir}_build_command} && touch ../.build.done
+		add_custom_target(${subdir}_build COMMAND /bin/bash -c \"[ -f '../.build.done' ] && exit 0 || ${SETUP_COMMAND}\; ${${subdir}_build_command} && touch ../.build.done\"
 			WORKING_DIRECTORY ${${subdir}_build_dir}/${subdir}-${${subdir}_version}
 			DEPENDS ${subdir}_configure
 		)
@@ -54,7 +55,7 @@ FOREACH(subdir ${SUBDIRS})
 		if(NOT DEFINED ${subdir}_install_command)
 			set(${subdir}_install_command make install DESTDIR=${CMAKE_SOURCE_DIR}/target)
 		endif()
-		add_custom_target(${subdir}_install COMMAND [ -f "../.install.done" ] || ${SETUP_COMMAND} && ${${subdir}_install_command} && touch ../.install.done
+		add_custom_target(${subdir}_install COMMAND /bin/bash -c \"[ -f "../.install.done" ] && exit 0 || ${SETUP_COMMAND}\; ${${subdir}_install_command} && touch ../.install.done \"
 			WORKING_DIRECTORY ${${subdir}_build_dir}/${subdir}-${${subdir}_version}
 			DEPENDS ${subdir}_build
 		)
