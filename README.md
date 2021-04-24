@@ -24,7 +24,7 @@ Preparation
 
 1. Download the Android NDK [here](https://developer.android.com/ndk/downloads). Version r21e is the LTS at the time of this writing, it works well.
 2. Unpack the NDK
-3. Edit the `arm64-v8a-android-toolchain.cmake` file (or you can create a custom one) and the NDK directory to locate your installation
+3. Edit the `arm64-v8a-android-toolchain.params` file (or you can create a custom one) and the NDK directory to locate your installation
 4. Install Ruby 3.0.0+ on your host with `rvm` or `rbenv` (ruby on the host side is currently required by the `make install` step of ruby package)
 5. Download a CMake 3.10+. The minor version is important to ensure the latest NDKs (r19+) are automatically detected
 
@@ -43,7 +43,7 @@ Apart from the configure step, everything compiles fine.
 Compilation
 ====
 
-Start the CMake configuration of the project with `cmake -DCMAKE_TOOLCHAIN_FILE=arm64-v8a-android-toolchain.cmake .` from the root folder
+Start the CMake configuration of the project with `./configure` from the root folder
 
 Installation
 ====
