@@ -61,6 +61,10 @@ FOREACH(subdir ${SUBDIRS})
 		)
 
 		add_dependencies(${subdir} ${subdir}_install)
+
+		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/cmake-final.conf")
+			include(${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/cmake-final.conf)
+		endif()
 	endif()
 ENDFOREACH()
 
