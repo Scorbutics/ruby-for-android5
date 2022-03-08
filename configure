@@ -1,3 +1,13 @@
 #!/bin/sh
-export ANDROID_NDK=${ANDROID_NDK:-/usr/local/android/android-ndk-r22b}
+NDK_BASE=/home/$USER/Android/Sdk/ndk
+export ANDROID_NDK=${ANDROID_NDK:-$NDK_BASE/$(ls $NDK_BASE | tail -n 1)}
+if [ ! -d "$ANDROID_NDK" ]; then
+	echo "Unable to find a valid directory in the env variable \$ANDROID_NDK\nPlease ensure your ANDROID_NDK env variable points to a valid location of the NDK" && exit 1
+fi
+
+if ! grep -i "Android NDK" "$ANDROID_NDK/README.md"; then
+	echo "Invalid (?) Android NDK folder $ANDROID_NDK : could not locate 'Android NDK' string in $ANDROID_NDK/README.md" && exit 1
+fi
+
+echo "Android NDK is located in directory : $ANDROID_NDK"
 cmake `cat arm64-v8a-android-toolchain.params` -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake .
