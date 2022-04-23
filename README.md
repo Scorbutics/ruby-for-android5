@@ -22,7 +22,7 @@ For now, as the CMake build system here is quite generic, I think you can adapt 
 Preparation
 ===
 
-1. Download the Android NDK [here](https://developer.android.com/ndk/downloads). Version r21e is the LTS at the time of this writing, it works well.
+1. Download the Android NDK [here](https://developer.android.com/ndk/downloads). Version r23b (23.1.7779620) is the LTS at the time of this writing, it works well.
 2. Unpack the NDK
 3. Edit the `arm64-v8a-android-toolchain.params` file (or you can create a custom one) and the NDK directory to locate your installation
 4. Install Ruby 3.0.0+ on your host with `rvm` or `rbenv` (ruby on the host side is currently required by the `make install` step of ruby package)
@@ -33,12 +33,18 @@ Build
 Patches
 ====
 
-CRuby 3.0.0 configuration step is currently patched to support a NDK based clang compilation environment.
+ - CRuby 3.1.1 with the current NDK release does not require patching anymore.
 
-In particular, clang embeds some compiler type definition inside itself and does not support later redefinitions.
-`size_t`, `uint8_t`, `intptr_t`, ... are some examples of those dependent on compiler implementation types.
+ - openssl-1.1.1m does not require patching anymore with NDK versions => r22
 
-Apart from the configure step, everything compiles fine.
+Old notes on Patches
+====
+
+ - CRuby 3.0.0 configuration step is currently patched to support a NDK <= r22 based clang compilation environment.
+    In particular, clang embeds some compiler type definition inside itself and does not support later redefinitions.
+    `size_t`, `uint8_t`, `intptr_t`, ... are some examples of those dependent on compiler implementation types.
+
+ - As a ruby dependency for handling ssl, openssl-1.1.1k also needs a patch for any NDK >= r22 release.
 
 Compilation
 ====
@@ -66,7 +72,6 @@ For quality of life purpose, I provided a plain `setup_ruby.sh` shell script tha
 Limitations
 ===
 
-- It's a CRuby patched version, so you cannot update the CRuby version without adapting the patches. I hope someday they'll officially support a NDK based clang environment. Or I might be just missing one step...
 - I currently do not support Android version < 8 (and I am not sure I will)
-- You need an Unix-based environment to build
+- You need an Unix-based environment to build. Or you could build a container to run the compilation.
 - Full ruby output is ~27Mo, that's HUGE on embedded devices. If you're looking for a lightweight ruby implementation, look at [MRuby](https://github.com/mruby/mruby) instead
